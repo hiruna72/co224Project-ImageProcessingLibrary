@@ -54,22 +54,47 @@ printTotal:
 
 	mov r8,#0
 
-loop:
+loopScan:
 	
 	cmp r7,r8
 	beq loopOut
-	bal print
+	bal scan
 mid:
 	add r8,r8,#1
-	bal loop	
-print:
-	ldr	r0, =formatWish	
-	bl printf
+	bal loopScan	
+scan:
+	@allocate stack for input
+	sub	sp, sp, #4
+
+	@scanf to get an integer
+	ldr	r0, =formats
+	mov	r1, sp	
+	bl	scanf	@scanf("%d",sp)
 	bal mid
-
-
 loopOut:
+	mov r8,#0
 
+loopPrint:
+	
+	cmp r7,r8
+	beq loopOut2
+	bal print
+mid2:
+	add r8,r8,#1
+	bal loopPrint	
+print:
+	@copy from stack to register
+	ldr	r1, [sp,#0]
+
+	@release stack
+	add	sp, sp, #4
+
+	@format for printf
+	ldr	r0, =formatp
+	bl 	printf
+	bal mid2
+
+loopOut2:
 	@copy from stack to register
 	ldr	r1, [sp,#0]
 	
@@ -111,7 +136,7 @@ loopOut:
 	
 	.data	@ data memory
 formats: .asciz "%d"
-formatp: .asciz "The number is %d\n"
+formatp: .asciz " %d "
 formatRow: .asciz "The numberOfRows is %d\n"
 formatCol: .asciz "The numberOfCols is %d\n"
 formatopCode: .asciz "The opCode is %d\n"
