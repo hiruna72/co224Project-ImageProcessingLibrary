@@ -19,8 +19,10 @@ readDims:
 	ldr	r0, =formats
 	mov	r1, sp	
 	bl	scanf	@scanf("%d",sp)
-	@r2 holds the number of rows
-	ldr	r2, [sp, #0]
+	@r4 holds the number of rows
+	ldr	r1, [sp,#0]
+	mov r4,r1
+
 	@allocate stack for input
 	sub	sp, sp, #4
 
@@ -28,30 +30,66 @@ readDims:
 	ldr	r0, =formats
 	mov	r1, sp	
 	bl	scanf	@scanf("%d",sp)
-	@r3 holds the number of columns
-	ldr	r3, [sp, #0]
-	mul r5,r3,r2
-	mov r4,r5
+	@r5 holds the number of columns
+	ldr	r1, [sp, #0]
+	mov r5,r1
 
-loopScan:
-	cmp r4,#0
-	bge loopOut
-	sub r4,r4,#1
-	ldr	r0, =formatWish	
+
+	@allocate stack for input
+	sub	sp, sp, #4
+
+	@scanf to get an integer
+	ldr	r0, =formats
+	mov	r1, sp	
+	bl	scanf	@scanf("%d",sp)
+	@r6 holds the opCode
+	ldr	r1, [sp, #0]
+	mov r6,r1
+	mul r7,r4,r5
+
+printTotal:
+	mov r1,r7	
+	ldr	r0, =formatopCode
 	bl 	printf
-	b loopScan
+
+	mov r8,#0
+
+loop:
+	
+	cmp r7,r8
+	beq loopOut
+	bal print
+mid:
+	add r8,r8,#1
+	bal loop	
+print:
+	ldr	r0, =formatWish	
+	bl printf
+	bal mid
+
 
 loopOut:
 
 	@copy from stack to register
 	ldr	r1, [sp,#0]
-
+	
 	@release stack
 	add	sp, sp, #4
 
 	@format for printf
-	ldr	r0, =formatp
+	ldr	r0, =formatopCode
 	bl 	printf
+
+	@copy from stack to register
+	ldr	r1, [sp,#0]
+	
+	@release stack
+	add	sp, sp, #4
+
+	@format for printf
+	ldr	r0, =formatCol
+	bl 	printf
+
 
 	@copy from stack to register
 	ldr	r1, [sp,#0]
@@ -60,7 +98,7 @@ loopOut:
 	add	sp, sp, #4
 
 	@format for printf
-	ldr	r0, =formatp
+	ldr	r0, =formatRow
 	bl 	printf
 
 
@@ -74,6 +112,9 @@ loopOut:
 	.data	@ data memory
 formats: .asciz "%d"
 formatp: .asciz "The number is %d\n"
+formatRow: .asciz "The numberOfRows is %d\n"
+formatCol: .asciz "The numberOfCols is %d\n"
+formatopCode: .asciz "The opCode is %d\n"
 formatCheck: .asciz " check "
 formatWish: .asciz " wish "
 
